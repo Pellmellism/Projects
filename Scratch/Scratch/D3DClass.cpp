@@ -1,6 +1,8 @@
 #include "D3DClass.h"
 #include "FrameWork.h"
 
+
+
 D3DClass::D3DClass()
 {
 	red = 0;
@@ -9,6 +11,7 @@ D3DClass::D3DClass()
 	colormodr = 1;
 	colormodg = 1;
 	colormodb = 1;
+	rot = 0.01f;
 }
 
 
@@ -111,6 +114,7 @@ void D3DClass::ReleaseObjects()
 	vertLayout->Release();
 	depthStencilView->Release();
 	depthStencilBuffer->Release();
+	cbPerObjectBuffer->Release();
 }
 
 bool D3DClass::InitScene()
@@ -147,8 +151,8 @@ bool D3DClass::InitScene()
 	m_deviceContext->VSSetShader(VS, 0, 0);
 	m_deviceContext->PSSetShader(PS, 0, 0);
 
-	//Create the vertex buffer
-	Vertex v[] =
+	//Create the vertex buffer for Square
+	/*Vertex v[] =
 	{
 		Vertex(-0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f),
 		Vertex(-0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f),
@@ -157,13 +161,54 @@ bool D3DClass::InitScene()
 	};
 
 	DWORD indices[] = { 0, 1, 2,
-		0, 2, 3 };
+		0, 2, 3 };*/
+
+
+	
+	//For Cube
+	Vertex v[] =
+	{
+		Vertex(-1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f),
+		Vertex(-1.0f, +1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f),
+		Vertex(+1.0f, +1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f),
+		Vertex(+1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f),
+		Vertex(-1.0f, -1.0f, +1.0f, 0.0f, 1.0f, 1.0f, 1.0f),
+		Vertex(-1.0f, +1.0f, +1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
+		Vertex(+1.0f, +1.0f, +1.0f, 1.0f, 0.0f, 1.0f, 1.0f),
+		Vertex(+1.0f, -1.0f, +1.0f, 1.0f, 0.0f, 0.0f, 1.0f),
+	};
+
+	DWORD indices[] = {
+		// front face
+		0, 1, 2,
+		0, 2, 3,
+
+		// back face
+		4, 6, 5,
+		4, 7, 6,
+
+		// left face
+		4, 5, 1,
+		4, 1, 0,
+
+		// right face
+		3, 2, 6,
+		3, 6, 7,
+
+		// top face
+		1, 5, 6,
+		1, 6, 2,
+
+		// bottom face
+		4, 0, 3,
+		4, 3, 7
+	};
 
 	D3D11_BUFFER_DESC indexBufferDesc;
 	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
 
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(DWORD) * 2 * 3;
+	indexBufferDesc.ByteWidth = sizeof(DWORD) * 12 * 3;
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufferDesc.CPUAccessFlags = 0;
 	indexBufferDesc.MiscFlags = 0;
@@ -178,7 +223,7 @@ bool D3DClass::InitScene()
 	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
 
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = sizeof(Vertex) * 4;
+	vertexBufferDesc.ByteWidth = sizeof(Vertex) * 8;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.CPUAccessFlags = 0;
 	vertexBufferDesc.MiscFlags = 0;
@@ -217,6 +262,31 @@ bool D3DClass::InitScene()
 
 	//Set the Viewport
 	m_deviceContext->RSSetViewports(1, &viewport);
+
+
+	D3D11_BUFFER_DESC cbbd;
+	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
+
+	cbbd.Usage = D3D11_USAGE_DEFAULT;
+	cbbd.ByteWidth = sizeof(cbPerObject);
+	cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbbd.CPUAccessFlags = 0;
+	cbbd.MiscFlags = 0;
+
+	hr = m_device->CreateBuffer(&cbbd, NULL, &cbPerObjectBuffer);
+
+	//Camera information
+	//camPosition = XMVectorSet(0.0f, 0.0f, -0.5f, 0.0f);
+	camPosition = XMVectorSet(0.0f, 3.0f, -8.0f, 0.0f);
+	camTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	//Set the View matrix
+	camView = XMMatrixLookAtLH(camPosition, camTarget, camUp);
+
+	//Set the Projection matrix
+	camProjection = XMMatrixPerspectiveFovLH(0.4f*3.14f, (float)width / height, 1.0f, 1000.0f);
+
 	return true;
 }
 
@@ -232,17 +302,75 @@ void D3DClass::UpdateScene()
 		colormodg *= -1;
 	if (blue >= 1.0f || blue <= 0.0f)
 		colormodb *= -1;
+
+	//Keep the cubes rotating
+	rot += .0005f;
+	if (rot > 6.28f)
+		rot = 0.0f;
+
+	//Reset cube1World
+	cube1World = XMMatrixIdentity();
+
+	//Define cube1's world space matrix
+	XMVECTOR rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	Rotation = XMMatrixRotationAxis(rotaxis, rot);
+	Translation = XMMatrixTranslation(0.0f, 0.0f, 4.0f);
+
+	//Set cube1's world space using the transformations
+	cube1World = Translation * Rotation;
+
+	//Reset cube2World
+	cube2World = XMMatrixIdentity();
+
+	//Define cube2's world space matrix
+	Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+	Scale = XMMatrixScaling(1.3f, 1.3f, 1.3f);
+
+	//Set cube2's world space matrix
+	cube2World = Rotation * Scale;
 }
 
 void D3DClass::DrawScene()
 {
 	float color[4] = { red, green, blue, 1.0f };
+
+	cbPerObject cbPerObj;
+
 	m_deviceContext->ClearRenderTargetView(m_targetView, color);
 
 	m_deviceContext->ClearDepthStencilView(depthStencilView,D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f,0);
-	//Draw the triangle
-	//m_deviceContext->Draw(3, 0);
-	m_deviceContext->DrawIndexed(6, 0, 0);
+
+	//Set the World/View/Projection matrix, then send it to constant buffer in effect file
+	//World = XMMatrixIdentity();
+
+	//WVP = World * camView * camProjection;
+	//
+	//cbPerObj.WVP = XMMatrixTranspose(WVP);
+
+	//m_deviceContext->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+
+	//m_deviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+
+	////Draw the triangle
+	////m_deviceContext->Draw(3, 0);
+	//m_deviceContext->DrawIndexed(6, 0, 0);
+
+	//Set the WVP matrix and send it to the constant buffer in effect file
+	WVP = cube1World * camView * camProjection;
+	cbPerObj.WVP = XMMatrixTranspose(WVP);
+	m_deviceContext->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+	m_deviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+
+	//Draw the first cube
+	m_deviceContext->DrawIndexed(36, 0, 0);
+
+	WVP = cube2World * camView * camProjection;
+	cbPerObj.WVP = XMMatrixTranspose(WVP);
+	m_deviceContext->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+	m_deviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+
+	//Draw the second cube
+	m_deviceContext->DrawIndexed(36, 0, 0);
 
 	m_swapChain->Present(0, 0);
 }

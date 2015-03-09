@@ -36,6 +36,7 @@ private:
 
 	ID3D11Buffer* squareIndexBuffer;
 	//ID3D11Buffer* squareVertBuffer;
+	ID3D11Buffer* cbPerObjectBuffer;
 
 	ID3D11DepthStencilView* depthStencilView;
 	ID3D11Texture2D* depthStencilBuffer;
@@ -47,6 +48,24 @@ private:
 	ID3D10Blob* PS_Buffer;
 	ID3D11InputLayout* vertLayout;
 
+	XMMATRIX WVP;
+	XMMATRIX World;
+	XMMATRIX camView;
+	XMMATRIX camProjection;
+
+	XMVECTOR camPosition;
+	XMVECTOR camTarget;
+	XMVECTOR camUp;
+	XMMATRIX cube1World;
+	XMMATRIX cube2World;
+
+	XMMATRIX Rotation;
+	XMMATRIX Scale;
+	XMMATRIX Translation;
+	
+
+	
+	float rot;
 	float red, green, blue;
 	int colormodr, colormodg, colormodb;
 };
@@ -58,5 +77,10 @@ struct Vertex
 
 	XMFLOAT3 pos;
 	XMFLOAT4 color;
+};
+
+struct cbPerObject
+{
+	XMMATRIX  WVP;
 };
 
