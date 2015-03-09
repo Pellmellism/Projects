@@ -1,0 +1,5 @@
+D:\abhimanyu_perforce\Encrypt\Encrypt\bin\Release\Encrypt.dll
+D:\abhimanyu_perforce\Encrypt\Encrypt\bin\Release\Encrypt.pdb
+D:\abhimanyu_perforce\Encrypt\Encrypt\obj\Release\Encrypt.csprojResolveAssemblyReference.cache
+D:\abhimanyu_perforce\Encrypt\Encrypt\obj\Release\Encrypt.dll
+D:\abhimanyu_perforce\Encrypt\Encrypt\obj\Release\Encrypt.pdb

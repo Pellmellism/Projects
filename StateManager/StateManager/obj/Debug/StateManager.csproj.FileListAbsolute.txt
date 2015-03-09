@@ -1,0 +1,5 @@
+c:\users\abhimanyu.chatterjee\documents\visual studio 2013\Projects\StateManager\StateManager\bin\Debug\StateManager.dll
+c:\users\abhimanyu.chatterjee\documents\visual studio 2013\Projects\StateManager\StateManager\bin\Debug\StateManager.pdb
+c:\users\abhimanyu.chatterjee\documents\visual studio 2013\Projects\StateManager\StateManager\obj\Debug\StateManager.csprojResolveAssemblyReference.cache
+c:\users\abhimanyu.chatterjee\documents\visual studio 2013\Projects\StateManager\StateManager\obj\Debug\StateManager.dll
+c:\users\abhimanyu.chatterjee\documents\visual studio 2013\Projects\StateManager\StateManager\obj\Debug\StateManager.pdb
