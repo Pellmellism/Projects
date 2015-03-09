@@ -115,6 +115,7 @@ void D3DClass::ReleaseObjects()
 	depthStencilView->Release();
 	depthStencilBuffer->Release();
 	cbPerObjectBuffer->Release();
+	WireFrame->Release();
 }
 
 bool D3DClass::InitScene()
@@ -287,6 +288,14 @@ bool D3DClass::InitScene()
 	//Set the Projection matrix
 	camProjection = XMMatrixPerspectiveFovLH(0.4f*3.14f, (float)width / height, 1.0f, 1000.0f);
 
+	D3D11_RASTERIZER_DESC wfdesc;
+	ZeroMemory(&wfdesc, sizeof(D3D11_RASTERIZER_DESC));
+	wfdesc.FillMode = D3D11_FILL_WIREFRAME;
+	wfdesc.CullMode = D3D11_CULL_NONE;
+	hr = m_device->CreateRasterizerState(&wfdesc, &WireFrame);
+
+	m_deviceContext->RSSetState(WireFrame);
+
 	return true;
 }
 
@@ -307,6 +316,7 @@ void D3DClass::UpdateScene()
 	rot += .0005f;
 	if (rot > 6.28f)
 		rot = 0.0f;
+
 
 	//Reset cube1World
 	cube1World = XMMatrixIdentity();
@@ -360,7 +370,7 @@ void D3DClass::DrawScene()
 	cbPerObj.WVP = XMMatrixTranspose(WVP);
 	m_deviceContext->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
 	m_deviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
-
+	
 	//Draw the first cube
 	m_deviceContext->DrawIndexed(36, 0, 0);
 

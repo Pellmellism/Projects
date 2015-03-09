@@ -34,6 +34,8 @@ private:
 	IDXGISwapChain* m_swapChain;
 	ID3D11RenderTargetView* m_targetView;
 
+	ID3D11RasterizerState* WireFrame;
+
 	ID3D11Buffer* squareIndexBuffer;
 	//ID3D11Buffer* squareVertBuffer;
 	ID3D11Buffer* cbPerObjectBuffer;
