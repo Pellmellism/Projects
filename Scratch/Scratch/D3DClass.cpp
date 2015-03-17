@@ -21,6 +21,7 @@ D3DClass::~D3DClass()
 
 bool D3DClass::InitializeD3DApp(HINSTANCE hInstance,HWND hwnd)
 {
+	//Fixed Code
 	HRESULT hr;
 
 	DXGI_MODE_DESC bufferDesc;
@@ -74,6 +75,7 @@ bool D3DClass::InitializeD3DApp(HINSTANCE hInstance,HWND hwnd)
 
 	backBuffer->Release();
 
+	//Fixed Code*
 
 	//Describe our Depth/Stencil Buffer
 	D3D11_TEXTURE2D_DESC depthStencilDesc;
@@ -101,6 +103,7 @@ bool D3DClass::InitializeD3DApp(HINSTANCE hInstance,HWND hwnd)
 
 void D3DClass::ReleaseObjects()
 {
+	//Fixed
 	m_swapChain->Release();
 	m_device->Release();
 	m_deviceContext->Release();
@@ -111,6 +114,7 @@ void D3DClass::ReleaseObjects()
 	PS->Release();
 	VS_Buffer->Release();
 	PS_Buffer->Release();
+	//Fixed*
 	vertLayout->Release();
 	depthStencilView->Release();
 	depthStencilBuffer->Release();
@@ -121,10 +125,16 @@ void D3DClass::ReleaseObjects()
 bool D3DClass::InitScene()
 {
 	HRESULT hr;
-	D3D11_INPUT_ELEMENT_DESC layout[] =
+	/*D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};*/
+
+	D3D11_INPUT_ELEMENT_DESC layout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
 
@@ -167,42 +177,107 @@ bool D3DClass::InitScene()
 
 	
 	//For Cube
+	//Vertex v[] =
+	//{
+	//	Vertex(-1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f),
+	//	Vertex(-1.0f, +1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f),
+	//	Vertex(+1.0f, +1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f),
+	//	Vertex(+1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f),
+	//	Vertex(-1.0f, -1.0f, +1.0f, 0.0f, 1.0f, 1.0f, 1.0f),
+	//	Vertex(-1.0f, +1.0f, +1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
+	//	Vertex(+1.0f, +1.0f, +1.0f, 1.0f, 0.0f, 1.0f, 1.0f),
+	//	Vertex(+1.0f, -1.0f, +1.0f, 1.0f, 0.0f, 0.0f, 1.0f),
+	//};
+
+	//DWORD indices[] = {
+	//	// front face
+	//	0, 1, 2,
+	//	0, 2, 3,
+
+	//	// back face
+	//	4, 6, 5,
+	//	4, 7, 6,
+
+	//	// left face
+	//	4, 5, 1,
+	//	4, 1, 0,
+
+	//	// right face
+	//	3, 2, 6,
+	//	3, 6, 7,
+
+	//	// top face
+	//	1, 5, 6,
+	//	1, 6, 2,
+
+	//	// bottom face
+	//	4, 0, 3,
+	//	4, 3, 7
+	//};
+
 	Vertex v[] =
 	{
-		Vertex(-1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f),
-		Vertex(-1.0f, +1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f),
-		Vertex(+1.0f, +1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f),
-		Vertex(+1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f),
-		Vertex(-1.0f, -1.0f, +1.0f, 0.0f, 1.0f, 1.0f, 1.0f),
-		Vertex(-1.0f, +1.0f, +1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
-		Vertex(+1.0f, +1.0f, +1.0f, 1.0f, 0.0f, 1.0f, 1.0f),
-		Vertex(+1.0f, -1.0f, +1.0f, 1.0f, 0.0f, 0.0f, 1.0f),
+		// Front Face
+		Vertex(-1.0f, -1.0f, -1.0f, 0.0f, 1.0f),
+		Vertex(-1.0f, 1.0f, -1.0f, 0.0f, 0.0f),
+		Vertex(1.0f, 1.0f, -1.0f, 1.0f, 0.0f),
+		Vertex(1.0f, -1.0f, -1.0f, 1.0f, 1.0f),
+
+		// Back Face
+		Vertex(-1.0f, -1.0f, 1.0f, 1.0f, 1.0f),
+		Vertex(1.0f, -1.0f, 1.0f, 0.0f, 1.0f),
+		Vertex(1.0f, 1.0f, 1.0f, 0.0f, 0.0f),
+		Vertex(-1.0f, 1.0f, 1.0f, 1.0f, 0.0f),
+
+		// Top Face
+		Vertex(-1.0f, 1.0f, -1.0f, 0.0f, 1.0f),
+		Vertex(-1.0f, 1.0f, 1.0f, 0.0f, 0.0f),
+		Vertex(1.0f, 1.0f, 1.0f, 1.0f, 0.0f),
+		Vertex(1.0f, 1.0f, -1.0f, 1.0f, 1.0f),
+
+		// Bottom Face
+		Vertex(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f),
+		Vertex(1.0f, -1.0f, -1.0f, 0.0f, 1.0f),
+		Vertex(1.0f, -1.0f, 1.0f, 0.0f, 0.0f),
+		Vertex(-1.0f, -1.0f, 1.0f, 1.0f, 0.0f),
+
+		// Left Face
+		Vertex(-1.0f, -1.0f, 1.0f, 0.0f, 1.0f),
+		Vertex(-1.0f, 1.0f, 1.0f, 0.0f, 0.0f),
+		Vertex(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f),
+		Vertex(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f),
+
+		// Right Face
+		Vertex(1.0f, -1.0f, -1.0f, 0.0f, 1.0f),
+		Vertex(1.0f, 1.0f, -1.0f, 0.0f, 0.0f),
+		Vertex(1.0f, 1.0f, 1.0f, 1.0f, 0.0f),
+		Vertex(1.0f, -1.0f, 1.0f, 1.0f, 1.0f),
 	};
 
 	DWORD indices[] = {
-		// front face
+		// Front Face
 		0, 1, 2,
 		0, 2, 3,
 
-		// back face
-		4, 6, 5,
-		4, 7, 6,
+		// Back Face
+		4, 5, 6,
+		4, 6, 7,
 
-		// left face
-		4, 5, 1,
-		4, 1, 0,
+		// Top Face
+		8, 9, 10,
+		8, 10, 11,
 
-		// right face
-		3, 2, 6,
-		3, 6, 7,
+		// Bottom Face
+		12, 13, 14,
+		12, 14, 15,
 
-		// top face
-		1, 5, 6,
-		1, 6, 2,
+		// Left Face
+		16, 17, 18,
+		16, 18, 19,
 
-		// bottom face
-		4, 0, 3,
-		4, 3, 7
+		// Right Face
+		20, 21, 22,
+		20, 22, 23
 	};
 
 	D3D11_BUFFER_DESC indexBufferDesc;
@@ -224,7 +299,7 @@ bool D3DClass::InitScene()
 	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
 
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = sizeof(Vertex) * 8;
+	vertexBufferDesc.ByteWidth = sizeof(Vertex) * 24;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.CPUAccessFlags = 0;
 	vertexBufferDesc.MiscFlags = 0;
@@ -288,9 +363,27 @@ bool D3DClass::InitScene()
 	//Set the Projection matrix
 	camProjection = XMMatrixPerspectiveFovLH(0.4f*3.14f, (float)width / height, 1.0f, 1000.0f);
 
+
+	hr = D3DX11CreateShaderResourceViewFromFile(m_device, L"untitled2.png",
+		NULL, NULL, &CubesTexture, NULL);
+
+	// Describe the Sample State
+	D3D11_SAMPLER_DESC sampDesc;
+	ZeroMemory(&sampDesc, sizeof(sampDesc));
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	//Create the Sample State
+	hr = m_device->CreateSamplerState(&sampDesc, &CubesTexSamplerState);
+
 	D3D11_RASTERIZER_DESC wfdesc;
 	ZeroMemory(&wfdesc, sizeof(D3D11_RASTERIZER_DESC));
-	wfdesc.FillMode = D3D11_FILL_WIREFRAME;
+	wfdesc.FillMode = D3D11_FILL_SOLID;
 	wfdesc.CullMode = D3D11_CULL_NONE;
 	hr = m_device->CreateRasterizerState(&wfdesc, &WireFrame);
 
@@ -327,7 +420,7 @@ void D3DClass::UpdateScene()
 	Translation = XMMatrixTranslation(0.0f, 0.0f, 4.0f);
 
 	//Set cube1's world space using the transformations
-	cube1World = Translation * Rotation;
+	cube1World = Translation*Rotation;
 
 	//Reset cube2World
 	cube2World = XMMatrixIdentity();
@@ -337,7 +430,7 @@ void D3DClass::UpdateScene()
 	Scale = XMMatrixScaling(1.3f, 1.3f, 1.3f);
 
 	//Set cube2's world space matrix
-	cube2World = Rotation * Scale;
+	cube2World = Rotation*Scale;
 }
 
 void D3DClass::DrawScene()
@@ -370,6 +463,8 @@ void D3DClass::DrawScene()
 	cbPerObj.WVP = XMMatrixTranspose(WVP);
 	m_deviceContext->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
 	m_deviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+	m_deviceContext->PSSetShaderResources(0, 1, &CubesTexture);
+	m_deviceContext->PSSetSamplers(0, 1, &CubesTexSamplerState);
 	
 	//Draw the first cube
 	m_deviceContext->DrawIndexed(36, 0, 0);
@@ -378,7 +473,8 @@ void D3DClass::DrawScene()
 	cbPerObj.WVP = XMMatrixTranspose(WVP);
 	m_deviceContext->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
 	m_deviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
-
+	m_deviceContext->PSSetShaderResources(0, 1, &CubesTexture);
+	m_deviceContext->PSSetSamplers(0, 1, &CubesTexSamplerState);
 	//Draw the second cube
 	m_deviceContext->DrawIndexed(36, 0, 0);
 

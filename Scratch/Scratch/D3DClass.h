@@ -12,7 +12,7 @@
 #include<xnamath.h>
 #include<DXErr.h>
 
-
+//#define _XM_NO_INTRINSICS_
 
 class D3DClass
 {
@@ -35,6 +35,9 @@ private:
 	ID3D11RenderTargetView* m_targetView;
 
 	ID3D11RasterizerState* WireFrame;
+
+	ID3D11ShaderResourceView* CubesTexture;
+	ID3D11SamplerState* CubesTexSamplerState;
 
 	ID3D11Buffer* squareIndexBuffer;
 	//ID3D11Buffer* squareVertBuffer;
@@ -75,10 +78,12 @@ private:
 struct Vertex
 {
 	Vertex(){}
-	Vertex(float x, float y, float z,float cr,float cg,float cb,float ca) : pos(x, y, z),color(cr,cg,cb,ca){}
+	Vertex(float x, float y, float z,
+		float u, float v)
+		: pos(x, y, z), texCoord(u, v){}
 
 	XMFLOAT3 pos;
-	XMFLOAT4 color;
+	XMFLOAT2 texCoord;
 };
 
 struct cbPerObject
