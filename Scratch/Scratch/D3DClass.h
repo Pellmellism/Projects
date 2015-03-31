@@ -39,6 +39,12 @@ private:
 	ID3D11ShaderResourceView* CubesTexture;
 	ID3D11SamplerState* CubesTexSamplerState;
 
+	ID3D11BlendState* Transparency;
+	ID3D11RasterizerState* CCWcullMode;
+	ID3D11RasterizerState* CWcullMode;
+
+	ID3D11RasterizerState* noCull;
+
 	ID3D11Buffer* squareIndexBuffer;
 	//ID3D11Buffer* squareVertBuffer;
 	ID3D11Buffer* cbPerObjectBuffer;

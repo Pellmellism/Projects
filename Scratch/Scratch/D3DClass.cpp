@@ -119,7 +119,12 @@ void D3DClass::ReleaseObjects()
 	depthStencilView->Release();
 	depthStencilBuffer->Release();
 	cbPerObjectBuffer->Release();
-	WireFrame->Release();
+	//WireFrame->Release();
+	/*Transparency->Release();
+	CCWcullMode->Release();
+	CWcullMode->Release();*/
+
+	noCull->Release();
 }
 
 bool D3DClass::InitScene()
@@ -364,7 +369,10 @@ bool D3DClass::InitScene()
 	camProjection = XMMatrixPerspectiveFovLH(0.4f*3.14f, (float)width / height, 1.0f, 1000.0f);
 
 
-	hr = D3DX11CreateShaderResourceViewFromFile(m_device, L"untitled2.png",
+	/*hr = D3DX11CreateShaderResourceViewFromFile(m_device, L"untitled2.png",
+		NULL, NULL, &CubesTexture, NULL);*/
+
+	hr = D3DX11CreateShaderResourceViewFromFile(m_device, L"muzzleflash.png",
 		NULL, NULL, &CubesTexture, NULL);
 
 	// Describe the Sample State
@@ -381,14 +389,56 @@ bool D3DClass::InitScene()
 	//Create the Sample State
 	hr = m_device->CreateSamplerState(&sampDesc, &CubesTexSamplerState);
 
-	D3D11_RASTERIZER_DESC wfdesc;
+	//For Wireframe/
+	/*D3D11_RASTERIZER_DESC wfdesc;
 	ZeroMemory(&wfdesc, sizeof(D3D11_RASTERIZER_DESC));
 	wfdesc.FillMode = D3D11_FILL_SOLID;
 	wfdesc.CullMode = D3D11_CULL_NONE;
 	hr = m_device->CreateRasterizerState(&wfdesc, &WireFrame);
 
-	m_deviceContext->RSSetState(WireFrame);
+	m_deviceContext->RSSetState(WireFrame);*/
+	//*Wireframe*/
 
+	//D3D11_BLEND_DESC blendDesc;
+	//ZeroMemory(&blendDesc, sizeof(blendDesc));
+
+	//D3D11_RENDER_TARGET_BLEND_DESC rtbd;
+	//ZeroMemory(&rtbd, sizeof(rtbd));
+
+	//rtbd.BlendEnable = true;
+	//rtbd.SrcBlend = D3D11_BLEND_SRC_COLOR;
+	//rtbd.DestBlend = D3D11_BLEND_BLEND_FACTOR;
+	//rtbd.BlendOp = D3D11_BLEND_OP_ADD;
+	//rtbd.SrcBlendAlpha = D3D11_BLEND_ONE;
+	//rtbd.DestBlendAlpha = D3D11_BLEND_ZERO;
+	//rtbd.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	//rtbd.RenderTargetWriteMask = D3D10_COLOR_WRITE_ENABLE_ALL;
+
+	//blendDesc.AlphaToCoverageEnable = false;
+	//blendDesc.RenderTarget[0] = rtbd;
+
+	//m_device->CreateBlendState(&blendDesc, &Transparency);
+
+	////Create the Counter Clockwise and Clockwise Culling States
+	//D3D11_RASTERIZER_DESC cmdesc;
+	//ZeroMemory(&cmdesc, sizeof(D3D11_RASTERIZER_DESC));
+
+	//cmdesc.FillMode = D3D11_FILL_SOLID;
+	//cmdesc.CullMode = D3D11_CULL_BACK;
+
+	//cmdesc.FrontCounterClockwise = true;
+	//hr = m_device->CreateRasterizerState(&cmdesc, &CCWcullMode);
+
+	//cmdesc.FrontCounterClockwise = false;
+	//hr = m_device->CreateRasterizerState(&cmdesc, &CWcullMode);
+
+	//Clipping
+	D3D11_RASTERIZER_DESC rastDesc;
+	ZeroMemory(&rastDesc, sizeof(D3D11_RASTERIZER_DESC));
+	rastDesc.FillMode = D3D11_FILL_SOLID;
+	rastDesc.CullMode = D3D11_CULL_NONE;
+
+	m_device->CreateRasterizerState(&rastDesc, &noCull);
 	return true;
 }
 
@@ -443,6 +493,59 @@ void D3DClass::DrawScene()
 
 	m_deviceContext->ClearDepthStencilView(depthStencilView,D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f,0);
 
+	////"fine-tune" the blending equation
+	//float blendFactor[] = { 0.75f, 0.75f, 0.75f, 1.0f };
+
+	////Set the default blend state (no blending) for opaque objects
+	//m_deviceContext->OMSetBlendState(0, 0, 0xffffffff);
+
+	////Render opaque objects//
+
+	////Set the blend state for transparent objects
+	//m_deviceContext->OMSetBlendState(Transparency, blendFactor, 0xffffffff);
+
+	////*****Transparency Depth Ordering*****//
+	////Find which transparent object is further from the camera
+	////So we can render the objects in depth order to the render target
+
+	////Find distance from first cube to camera
+	//XMVECTOR cubePos = XMVectorZero();
+
+	//cubePos = XMVector3TransformCoord(cubePos, cube1World);
+
+	//float distX = XMVectorGetX(cubePos) - XMVectorGetX(camPosition);
+	//float distY = XMVectorGetY(cubePos) - XMVectorGetY(camPosition);
+	//float distZ = XMVectorGetZ(cubePos) - XMVectorGetZ(camPosition);
+
+	//float cube1Dist = distX*distX + distY*distY + distZ*distZ;
+
+	////Find distance from second cube to camera
+	//cubePos = XMVectorZero();
+
+	//cubePos = XMVector3TransformCoord(cubePos, cube2World);
+
+	//distX = XMVectorGetX(cubePos) - XMVectorGetX(camPosition);
+	//distY = XMVectorGetY(cubePos) - XMVectorGetY(camPosition);
+	//distZ = XMVectorGetZ(cubePos) - XMVectorGetZ(camPosition);
+
+	//float cube2Dist = distX*distX + distY*distY + distZ*distZ;
+
+	////If the first cubes distance is less than the second cubes
+	//if (cube1Dist < cube2Dist)
+	//{
+	//	//Switch the order in which the cubes are drawn
+	//	XMMATRIX tempMatrix = cube1World;
+	//	cube1World = cube2World;
+	//	cube2World = tempMatrix;
+	//}
+
+	//Enable the Default Rasterizer State
+	m_deviceContext->RSSetState(NULL);
+	//Draw objects that will use backface culling
+
+	//Turn off backface culling
+	m_deviceContext->RSSetState(noCull);
+
 	//Set the World/View/Projection matrix, then send it to constant buffer in effect file
 	//World = XMMatrixIdentity();
 
@@ -465,9 +568,16 @@ void D3DClass::DrawScene()
 	m_deviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
 	m_deviceContext->PSSetShaderResources(0, 1, &CubesTexture);
 	m_deviceContext->PSSetSamplers(0, 1, &CubesTexSamplerState);
+
+	//Counter clockwise culling first because we need the back side of
+	//the cube to be rendered first, so the front side can blend with it
+	//m_deviceContext->RSSetState(CCWcullMode);
 	
 	//Draw the first cube
 	m_deviceContext->DrawIndexed(36, 0, 0);
+
+	/*m_deviceContext->RSSetState(CWcullMode);
+	m_deviceContext->DrawIndexed(36, 0, 0);*/
 
 	WVP = cube2World * camView * camProjection;
 	cbPerObj.WVP = XMMatrixTranspose(WVP);
@@ -475,8 +585,13 @@ void D3DClass::DrawScene()
 	m_deviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
 	m_deviceContext->PSSetShaderResources(0, 1, &CubesTexture);
 	m_deviceContext->PSSetSamplers(0, 1, &CubesTexSamplerState);
+
+	//m_deviceContext->RSSetState(CCWcullMode);
 	//Draw the second cube
 	m_deviceContext->DrawIndexed(36, 0, 0);
+
+	/*m_deviceContext->RSSetState(CWcullMode);
+	m_deviceContext->DrawIndexed(36, 0, 0);*/
 
 	m_swapChain->Present(0, 0);
 }
